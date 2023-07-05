@@ -23,3 +23,4 @@ app.listen(port, () => {
 
 app.get('/devices', db.getDevices);
 app.get('/devices/:id', db.getDeviceById);
+app.get('/devices/info/:id', db.getEffectByDeviceId);
