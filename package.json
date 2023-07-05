@@ -1,0 +1,13 @@
+{
+  "name": "led-backend",
+  "version": "1.0.0",
+  "description": "RESTful API for LED control",
+  "main": "index.js",
+  "author": "Yentl Hendrickx",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "pg": "^8.11.1"
+  }
+}
