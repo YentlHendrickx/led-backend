@@ -13,14 +13,12 @@ app.use(
     })
 );
 
-app.get('/', (request, response) => {
-    response.json({ info: 'Node.js, Express, and Postgres API' })
-});
-
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
 });
 
 app.get('/devices', db.getDevices);
+app.get('/devices/ping', db.pingServer);
 app.get('/devices/:id', db.getDeviceById);
+app.get('/devices/mac/:mac_address', db.getDeviceByMacAddress);
 app.get('/devices/info/:id', db.getEffectByDeviceId);

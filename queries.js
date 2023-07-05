@@ -9,22 +9,67 @@ const pool = new Pool({
 
 // Devices
 const getDevices = (request, response) => {
-    pool.query('SELECT * FROM devices ORDER BY id ASC', (error, results) => {
+    pool.query('SELECT * FROM "Devices" ORDER BY id ASC', (error, results) => {
         if (error) {
             throw error;
         }
         response.status(200).json(results.rows);
-    })
+    });
 }
 
 const getDeviceById = (request, response) => {
     const id = parseInt(request.params.id);
-    pool.query('SELECT * FROM devices WHERE id = $1', [id], (error, results) => {
+    pool.query('SELECT * FROM "Devices" WHERE id = $1', [id], (error, results) => {
         if (error) {
             throw error;
         }
         response.status(200).json(results.rows);
-    })
+    });
+}
+
+const getDeviceByMacAddress = (request, response) => {
+    const mac_address = request.params.mac_address;
+    pool.query('SELECT * FROM "Devices" WHERE mac_address = $1', [mac_address], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    });
+}
+
+// Endpoint for pinging the server, to update the last_seen timestamp and or create a new device
+const pingServer = (request, response) => {
+    const { name, ip_address, mac_address, led_count } = request.body;
+
+    // Check if the mac address already exists in the database
+    pool.query('SELECT * FROM "Devices" WHERE mac_address = $1', [mac_address], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        if (results.rows.length > 0) {
+            // update the last_seen timestamp
+            const timestamp = new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Brussels' });
+            pool.query('UPDATE "Devices" SET last_seen = $1 WHERE mac_address = $2', [timestamp, mac_address], (error, newresult) => { 
+                if (error) {
+                    throw error;
+                }
+
+                response.status(200).json(`Updated the timestamp of device with ID: ${results.rows[0].id}`);
+            });
+
+        } else {
+            // If the mac address doesn't exist, create the device
+            const timestamp = new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Brussels' });
+            
+            pool.query('INSERT INTO "Devices" (name, ip_address, mac_address, led_count, first_seen, last_seen) VALUES ($1, $2, $3, $4, $5, $6)', 
+            [name, ip_address, mac_address, led_count, timestamp, timestamp], (error, newresult) => {
+                if (error) {
+                    throw error;
+                }
+                response.status(201).json(`Device added with ID: ${newresult.id}`);
+            });
+        }
+    });
 }
 
 // Get effect info for device
@@ -47,12 +92,14 @@ const getEffectByDeviceId = (request, response) => {
             throw error;
         }
         response.status(200).json(results.rows);
-    })
+    });
 }
 
-
+// Export the functions
 module.exports = {
     getDevices,
     getDeviceById,
+    getDeviceByMacAddress,
     getEffectByDeviceId,
+    pingServer,
 }
