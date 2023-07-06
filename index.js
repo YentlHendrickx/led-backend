@@ -17,8 +17,17 @@ app.listen(port, () => {
     console.log(`App running on port ${port}.`)
 });
 
+app.get('/testMQTT', db.testMQTT);
+
+// Devices
 app.get('/devices', db.getDevices);
-app.get('/devices/ping', db.pingServer);
-app.get('/devices/:id', db.getDeviceById);
+app.get('/devices/id/:id', db.getDeviceById);
+app.get('/devices/ping/', db.pingServer);
 app.get('/devices/mac/:mac_address', db.getDeviceByMacAddress);
-app.get('/devices/info/:id', db.getEffectByDeviceId);
+
+// Effects
+app.get('/devices/effects/info/', db.getEffectByDevices);
+app.get('/devices/effects/info/:id', db.getEffectByDeviceId);
+
+// Effects
+app.get('/effects', db.getEffects);

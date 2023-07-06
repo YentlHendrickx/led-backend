@@ -7,9 +7,16 @@ const pool = new Pool({
     port: 5432,
 });
 
+// MQTT
+const mqtt = require('./mqtt');
+
+const testMQTT = (request, response) => {
+    response.status(200).json(mqtt.UpdateClients('testTopic', 'send'));
+}
+
 // Devices
 const getDevices = (request, response) => {
-    pool.query('SELECT * FROM "Devices" ORDER BY id ASC', (error, results) => {
+    pool.query('SELECT * FROM "Devices" ORDER BY last_seen DESC', (error, results) => {
         if (error) {
             throw error;
         }
@@ -37,9 +44,21 @@ const getDeviceByMacAddress = (request, response) => {
     });
 }
 
+// EFFECTS
+const getEffects = (request, response) => {
+    pool.query('SELECT * FROM "Effects" ORDER BY id ASC', (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    });
+}
+
 // Endpoint for pinging the server, to update the last_seen timestamp and or create a new device
 const pingServer = (request, response) => {
     const { name, ip_address, mac_address, led_count } = request.body;
+
+    console.log(request.body);
 
     // Check if the mac address already exists in the database
     pool.query('SELECT * FROM "Devices" WHERE mac_address = $1', [mac_address], (error, results) => {
@@ -73,6 +92,28 @@ const pingServer = (request, response) => {
 }
 
 // Get effect info for device
+const getEffectByDevices = (request, response) => {
+    pool.query(`
+    SELECT d.id AS device_id, d.name AS device_name, 
+    e.name AS effect_name, c.name AS color_name, c.rgb_value AS color_value,
+    STRING_AGG(p.name || ': ' || pv.value, ', ') AS parameters
+        FROM public."Devices" d
+        JOIN public."DeviceEffects" de ON d.id = de.device_id
+        JOIN public."Effects" e ON de.effect_id = e.id
+        JOIN public."Colors" c ON de.color_id = c.id
+        JOIN public."EffectParameters" ep ON e.id = ep.effect_id
+        JOIN public."Parameters" p ON ep.parameter_id = p.id
+        JOIN public."ParameterValues" pv ON ep.id = pv.effect_parameter_id
+        GROUP BY d.id, d.name, e.name, c.name, c.rgb_value;
+    `, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    });
+}
+
+// Get effect info for device by id
 const getEffectByDeviceId = (request, response) => {
     const id = parseInt(request.params.id);
     pool.query(`
@@ -97,9 +138,17 @@ const getEffectByDeviceId = (request, response) => {
 
 // Export the functions
 module.exports = {
+    // Devices
     getDevices,
     getDeviceById,
     getDeviceByMacAddress,
+
+    // Effects
+    getEffects,
+    getEffectByDevices,
     getEffectByDeviceId,
+    
+    // Utilities
     pingServer,
+    testMQTT,
 }
