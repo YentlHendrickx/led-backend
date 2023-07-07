@@ -1,25 +1,38 @@
+// Author: Yentl Hendrickx
+// Created: 2023-07-07
+// Description: Wrapper for MQTT client to publish messages to broker
+
+// Load environment variables
+require('dotenv').config();
+
 const mqtt = require('mqtt');
-const protocol = 'http';
-const host = '192.168.199.250';
-const port = 1883;
+
+// Read from .env
+const protocol = process.env.MQTT_PROTOCOL;
+const host = process.env.MQTT_HOST;
+const port = process.env.MQTT_PORT;
+
 const clientId = 'mqttjs_' + Math.random().toString(16).slice(3);
 const connectUrl = `${protocol}://${host}:${port}`;
 
+// For reconnecting and dropping connection 
 let client = null;
 let timer = null;
 
 // Time in minutes before breaking connection
 const connectionBreak = 5;
 
-function UpdateClients(topic, message) {
+function SendMessage(topic, message) {
     Connect();
 
+    // If connected send message, otherwise wait for connection and recurse
     if (client.connected) {
+        // Public and start connection timer
         Publish(topic, message);
         ResetTimer();
     } else {
         client.on('connect', () => {
-            UpdateClients(topic, message);
+            SendMessage(topic, message);
         });
     }
 }

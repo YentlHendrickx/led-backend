@@ -1,6 +1,7 @@
 node_modules
 build
 npm-debug.log
+.env
 .nyc
 .env
 .DS_Store
