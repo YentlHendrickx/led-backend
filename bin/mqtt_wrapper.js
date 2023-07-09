@@ -9,11 +9,11 @@ const mqtt = require('mqtt');
 
 // Read from .env
 const protocol = process.env.MQTT_PROTOCOL;
-const host = process.env.MQTT_HOST;
+const broker = process.env.MQTT_BROKER;
 const port = process.env.MQTT_PORT;
 
 const clientId = 'mqttjs_' + Math.random().toString(16).slice(3);
-const connectUrl = `${protocol}://${host}:${port}`;
+const connectUrl = `${protocol}://${broker}:${port}`;
 
 // For reconnecting and dropping connection 
 let client = null;
