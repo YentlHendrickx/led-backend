@@ -1,5 +1,5 @@
 // Author: Yentl Hendrickx
-// Created: 2023-07-07
+// Updated: 2023-10-22
 // Description: NodeJS server for Project LED 
 
 // Include .env
@@ -9,8 +9,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const port = process.env.SERVER_PORT;
-const db = require('./query_helper');
+const port: string = process.env.SERVER_PORT ?? "3000";
+console.log(process.env.SERVER_PORT);
+const db = require('../src/query/query_helper');
 
 // Start express app 
 const app = express();
@@ -38,6 +39,7 @@ app.get('/devices/mac/:mac_address', db.getDeviceByMacAddress);
 
 // Colors
 app.get('/colors', db.getColors);
+app.delete('/colors/:id', db.deleteColor);
 app.post('/colors', db.addColor);
 
 // Effects

@@ -1,10 +1,13 @@
 // Author: Yentl Hendrickx
-// Created: 2023-07-07
+// Updated: 2023-10-22
 // Description: All effect based queries
+//
+import { Pool } from "pg";
+import { Request, Response } from "express";
 
-module.exports = (pool) => {
+module.exports = (pool: Pool) => {
     // Effects
-    const getEffects = (request, response) => {
+    const getEffects = (request: Request, response: Response) => {
         pool.query('SELECT * FROM "effects" ORDER BY id ASC', (error, results) => {
             if (error) {
                 throw error;
@@ -14,7 +17,7 @@ module.exports = (pool) => {
     }
 
     // Get all devices and effects
-    const getAllDevicesAndEffects = (request, response) => {
+    const getAllDevicesAndEffects = (request: Request, response: Response) => {
         pool.query(`
             SELECT 
                 d.id AS device_id,
@@ -47,8 +50,8 @@ module.exports = (pool) => {
     }
 
     // Get effect info for device by id
-    const getEffectByDeviceId = (request, response) => {
-        const id = parseInt(request.params.id);
+    const getEffectByDeviceId = (request: Request, response: Response) => {
+        const id: number = parseInt(request.params.id);
         pool.query(`
         SELECT e.name AS effect_name, c.name AS color_name, c.rgba_value AS color_value,
         STRING_AGG(p.name::text || ': ' || pv.value::text, ', ') AS parameters

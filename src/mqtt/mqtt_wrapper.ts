@@ -1,28 +1,31 @@
 // Author: Yentl Hendrickx
-// Created: 2023-07-07
+// Updated: 2023-10-22
 // Description: Wrapper for MQTT client to publish messages to broker
+
+import { MqttClient } from "mqtt";
+import mqtt from "mqtt";
 
 // Load environment variables
 require('dotenv').config();
 
-const mqtt = require('mqtt');
+// const mqtt = require('mqtt');
 
 // Read from .env
-const protocol = process.env.MQTT_PROTOCOL;
-const broker = process.env.MQTT_BROKER;
-const port = process.env.MQTT_PORT;
+const protocol: string = process.env.MQTT_PROTOCOL ?? 'mqtt';
+const broker: string = process.env.MQTT_BROKER ?? 'localhost';
+const port: string = process.env.MQTT_PORT ?? '1883';
 
 const clientId = 'mqttjs_' + Math.random().toString(16).slice(3);
 const connectUrl = `${protocol}://${broker}:${port}`;
 
 // For reconnecting and dropping connection 
-let client = null;
-let timer = null;
+let client: MqttClient;
+let timer: NodeJS.Timeout;
 
 // Time in minutes before breaking connection
 const connectionBreak = 5;
 
-function SendMessage(topic, message) {
+function SendMessage(topic: string, message: string) {
     Connect();
 
     // If connected send message, otherwise wait for connection and recurse
@@ -61,7 +64,7 @@ function ResetTimer() {
     }, connectionBreak * 60 * 1000);
 }
 
-function Publish(topic, message) {
+function Publish(topic: string, message: string) {
     client.publish(topic, message, { qos: 2, retain: true }, (error) => {
         if (error) {
             return('Error publishing message!');
@@ -70,5 +73,5 @@ function Publish(topic, message) {
 }
 
 module.exports = {
-    UpdateClients,
+    // UpdateClients,
 }
