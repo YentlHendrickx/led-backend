@@ -64,8 +64,7 @@ module.exports = (pool: Pool) => {
             response.status(500).json(error);
           }
 
-          console.log(results);
-          response.status(200).json(results.rows);
+          response.status(200).json(results.rows[0]);
         });
       } else {
         // Create new device effect
@@ -80,9 +79,7 @@ module.exports = (pool: Pool) => {
             response.status(500).json(error);
           }
 
-          // Return the new device effect
-
-          response.status(201).json(results.rows);
+          response.status(200).json(results.rows[0]);
         });
       }
     });
